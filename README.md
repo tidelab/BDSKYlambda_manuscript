@@ -1,1 +1,1 @@
-# BDSKYlambda_manuscript
+# BDSKYlambda manuscript
