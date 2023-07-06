@@ -1,0 +1,531 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><beast beautitemplate='Standard' beautistatus='' namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel
+:beast.evolution.substitutionmodel:beast.evolution.likelihood:beast.core.parameter:beast.evolution.tree.coalescent:multitypetree.operators:multitypetree.util:master.beast:master.conditions:master.model:master.postprocessors:master.outputs:master" version="2.0">
+
+	<map name="Beta">beast.math.distributions.Beta</map>
+	<map name="Exponential">beast.math.distributions.Exponential</map>
+	<map name="InverseGamma">beast.math.distributions.InverseGamma</map>
+	<map name="LogNormal">beast.math.distributions.LogNormalDistributionModel</map>
+	<map name="Gamma">beast.math.distributions.Gamma</map>
+	<map name="Uniform">beast.math.distributions.Uniform</map>
+	<map name="prior">beast.math.distributions.Prior</map>
+	<map name="LaplaceDistribution">beast.math.distributions.LaplaceDistribution</map>
+	<map name="OneOnX">beast.math.distributions.OneOnX</map>
+	<map name="Normal">beast.math.distributions.Normal</map>
+
+	<alignment spec="beast.evolution.alignment.Alignment" id="input_alignment_109.3" dataType="nucleotide">
+    <plate var='n' range='1:25'>
+		<sequence spec="Sequence" taxon="$(n)" value="?" />
+	</plate>	
+	</alignment>
+
+    <plate var='c' range='109.3'>  
+		<tree spec='BeastTreeFromMaster' id="mastertree_$(c)"
+			  samplePopulationSizes="true"
+			  nSamples="1"
+			  reverseTime="false">
+
+			<model spec='Model' id='model_$(c)'>
+
+				<populationType spec='PopulationType' typeName='X' dim='1' id='X_$(c)'/>
+				<populationType spec='PopulationType' typeName='S' dim='1' id='S_$(c)'/>
+
+				<reactionGroup spec='ReactionGroup' reactionGroupName='Birth'>
+					<reaction spec='Reaction' rate="$(c)">
+						X[0] -> 2X[0]
+					</reaction>
+				</reactionGroup>
+
+				<reactionGroup spec='ReactionGroup' reactionGroupName='Death'>
+					<reaction spec='Reaction' rate="36.135">
+						X[0] -> 0
+					</reaction>
+				</reactionGroup>
+
+				<reactionGroup spec='ReactionGroup' reactionGroupName='Sampling'>
+					<reaction spec='Reaction' rate="0.365">
+						X[0]:1 -> S[0]:1
+					</reaction>
+				</reactionGroup>
+
+			</model>
+
+			<initialState spec='InitState'>
+				<lineageSeed spec='Individual'>
+					<population spec='Population' type="@X_$(c)" location="0"/>
+				</lineageSeed>
+			</initialState>
+
+			<lineageEndCondition spec='LineageEndCondition' nLineages="0" isRejection="true">
+				<population spec='Population' type='@X_$(c)' location="0" />
+			</lineageEndCondition>
+
+			<lineageEndCondition spec='LineageEndCondition' nLineages="25" isRejection="false">
+				<population spec='Population' type='@S_$(c)' location="0" />
+			</lineageEndCondition>
+
+			<inheritancePostProcessor spec='LineageFilter' populationName="S"/>
+
+			<inheritancePostProcessor spec='LineageFilter' populationName="S"
+									  leavesOnly="true" discard="true"/>
+
+			
+			<output spec='NexusOutput' fileName='$(filebase)_$(seed)_$(c).nexus'/>
+			
+
+		</tree>
+
+
+		<data spec='beast.app.seqgen.SimulatedAlignment' id='alignment_$(c)'
+			  data="@input_alignment_109.3"
+			  sequencelength="30000"
+			  outputFileName="$(filebase)_$(seed)_$(c)_alignment.txt"
+			  tree="@mastertree_$(c)" siteModel="@SiteModel">
+			<sequence spec="Sequence" taxon="dummy" value="?" />
+		</data>
+	</plate>
+
+
+	<alignment spec="beast.evolution.alignment.Alignment" id="input_alignment_109.4" dataType="nucleotide">
+    <plate var='n' range='1:25'>
+		<sequence spec="Sequence" taxon="$(n)" value="?" />
+	</plate>	
+	</alignment>
+
+    <plate var='c' range='109.4'>  
+		<tree spec='BeastTreeFromMaster' id="mastertree_$(c)"
+			  samplePopulationSizes="true"
+			  nSamples="1"
+			  reverseTime="false">
+
+			<model spec='Model' id='model_$(c)'>
+
+				<populationType spec='PopulationType' typeName='X' dim='1' id='X_$(c)'/>
+				<populationType spec='PopulationType' typeName='S' dim='1' id='S_$(c)'/>
+
+				<reactionGroup spec='ReactionGroup' reactionGroupName='Birth'>
+					<reaction spec='Reaction' rate="$(c)">
+						X[0] -> 2X[0]
+					</reaction>
+				</reactionGroup>
+
+				<reactionGroup spec='ReactionGroup' reactionGroupName='Death'>
+					<reaction spec='Reaction' rate="36.135">
+						X[0] -> 0
+					</reaction>
+				</reactionGroup>
+
+				<reactionGroup spec='ReactionGroup' reactionGroupName='Sampling'>
+					<reaction spec='Reaction' rate="0.365">
+						X[0]:1 -> S[0]:1
+					</reaction>
+				</reactionGroup>
+
+			</model>
+
+			<initialState spec='InitState'>
+				<lineageSeed spec='Individual'>
+					<population spec='Population' type="@X_$(c)" location="0"/>
+				</lineageSeed>
+			</initialState>
+
+			<lineageEndCondition spec='LineageEndCondition' nLineages="0" isRejection="true">
+				<population spec='Population' type='@X_$(c)' location="0" />
+			</lineageEndCondition>
+
+			<lineageEndCondition spec='LineageEndCondition' nLineages="25" isRejection="false">
+				<population spec='Population' type='@S_$(c)' location="0" />
+			</lineageEndCondition>
+
+			<inheritancePostProcessor spec='LineageFilter' populationName="S"/>
+
+			<inheritancePostProcessor spec='LineageFilter' populationName="S"
+									  leavesOnly="true" discard="true"/>
+
+			
+			<output spec='NexusOutput' fileName='$(filebase)_$(seed)_$(c).nexus'/>
+			
+
+		</tree>
+
+
+		<data spec='beast.app.seqgen.SimulatedAlignment' id='alignment_$(c)'
+			  data="@input_alignment_109.4"
+			  sequencelength="30000"
+			  outputFileName="$(filebase)_$(seed)_$(c)_alignment.txt"
+			  tree="@mastertree_$(c)" siteModel="@SiteModel">
+			<sequence spec="Sequence" taxon="dummy" value="?" />
+		</data>
+	</plate>
+
+	<alignment spec="beast.evolution.alignment.Alignment" id="input_alignment_109.5" dataType="nucleotide">
+    <plate var='n' range='1:25'>
+		<sequence spec="Sequence" taxon="$(n)" value="?" />
+	</plate>	
+	</alignment>
+
+    <plate var='c' range='109.5'>  
+		<tree spec='BeastTreeFromMaster' id="mastertree_$(c)"
+			  samplePopulationSizes="true"
+			  nSamples="1"
+			  reverseTime="false">
+
+			<model spec='Model' id='model_$(c)'>
+
+				<populationType spec='PopulationType' typeName='X' dim='1' id='X_$(c)'/>
+				<populationType spec='PopulationType' typeName='S' dim='1' id='S_$(c)'/>
+
+				<reactionGroup spec='ReactionGroup' reactionGroupName='Birth'>
+					<reaction spec='Reaction' rate="$(c)">
+						X[0] -> 2X[0]
+					</reaction>
+				</reactionGroup>
+
+				<reactionGroup spec='ReactionGroup' reactionGroupName='Death'>
+					<reaction spec='Reaction' rate="36.135">
+						X[0] -> 0
+					</reaction>
+				</reactionGroup>
+
+				<reactionGroup spec='ReactionGroup' reactionGroupName='Sampling'>
+					<reaction spec='Reaction' rate="0.365">
+						X[0]:1 -> S[0]:1
+					</reaction>
+				</reactionGroup>
+
+			</model>
+
+			<initialState spec='InitState'>
+				<lineageSeed spec='Individual'>
+					<population spec='Population' type="@X_$(c)" location="0"/>
+				</lineageSeed>
+			</initialState>
+
+			<lineageEndCondition spec='LineageEndCondition' nLineages="0" isRejection="true">
+				<population spec='Population' type='@X_$(c)' location="0" />
+			</lineageEndCondition>
+
+			<lineageEndCondition spec='LineageEndCondition' nLineages="25" isRejection="false">
+				<population spec='Population' type='@S_$(c)' location="0" />
+			</lineageEndCondition>
+
+			<inheritancePostProcessor spec='LineageFilter' populationName="S"/>
+
+			<inheritancePostProcessor spec='LineageFilter' populationName="S"
+									  leavesOnly="true" discard="true"/>
+
+			
+			<output spec='NexusOutput' fileName='$(filebase)_$(seed)_$(c).nexus'/>
+			
+
+		</tree>
+
+
+		<data spec='beast.app.seqgen.SimulatedAlignment' id='alignment_$(c)'
+			  data="@input_alignment_109.5"
+			  sequencelength="30000"
+			  outputFileName="$(filebase)_$(seed)_$(c)_alignment.txt"
+			  tree="@mastertree_$(c)" siteModel="@SiteModel">
+			<sequence spec="Sequence" taxon="dummy" value="?" />
+		</data>
+	</plate>
+
+
+	<alignment spec="beast.evolution.alignment.Alignment" id="input_alignment_109.6" dataType="nucleotide">
+    <plate var='n' range='1:25'>
+		<sequence spec="Sequence" taxon="$(n)" value="?" />
+	</plate>	
+	</alignment>
+
+    <plate var='c' range='109.6'>  
+		<tree spec='BeastTreeFromMaster' id="mastertree_$(c)"
+			  samplePopulationSizes="true"
+			  nSamples="1"
+			  reverseTime="false">
+
+			<model spec='Model' id='model_$(c)'>
+
+				<populationType spec='PopulationType' typeName='X' dim='1' id='X_$(c)'/>
+				<populationType spec='PopulationType' typeName='S' dim='1' id='S_$(c)'/>
+
+				<reactionGroup spec='ReactionGroup' reactionGroupName='Birth'>
+					<reaction spec='Reaction' rate="$(c)">
+						X[0] -> 2X[0]
+					</reaction>
+				</reactionGroup>
+
+				<reactionGroup spec='ReactionGroup' reactionGroupName='Death'>
+					<reaction spec='Reaction' rate="36.135">
+						X[0] -> 0
+					</reaction>
+				</reactionGroup>
+
+				<reactionGroup spec='ReactionGroup' reactionGroupName='Sampling'>
+					<reaction spec='Reaction' rate="0.365">
+						X[0]:1 -> S[0]:1
+					</reaction>
+				</reactionGroup>
+
+			</model>
+
+			<initialState spec='InitState'>
+				<lineageSeed spec='Individual'>
+					<population spec='Population' type="@X_$(c)" location="0"/>
+				</lineageSeed>
+			</initialState>
+
+			<lineageEndCondition spec='LineageEndCondition' nLineages="0" isRejection="true">
+				<population spec='Population' type='@X_$(c)' location="0" />
+			</lineageEndCondition>
+
+			<lineageEndCondition spec='LineageEndCondition' nLineages="25" isRejection="false">
+				<population spec='Population' type='@S_$(c)' location="0" />
+			</lineageEndCondition>
+
+			<inheritancePostProcessor spec='LineageFilter' populationName="S"/>
+
+			<inheritancePostProcessor spec='LineageFilter' populationName="S"
+									  leavesOnly="true" discard="true"/>
+
+			
+			<output spec='NexusOutput' fileName='$(filebase)_$(seed)_$(c).nexus'/>
+			
+
+		</tree>
+
+
+		<data spec='beast.app.seqgen.SimulatedAlignment' id='alignment_$(c)'
+			  data="@input_alignment_109.6"
+			  sequencelength="30000"
+			  outputFileName="$(filebase)_$(seed)_$(c)_alignment.txt"
+			  tree="@mastertree_$(c)" siteModel="@SiteModel">
+			<sequence spec="Sequence" taxon="dummy" value="?" />
+		</data>
+	</plate>
+
+
+	<alignment spec="beast.evolution.alignment.Alignment" id="input_alignment_182.5" dataType="nucleotide">
+    <plate var='n' range='1:250'>
+		<sequence spec="Sequence" taxon="$(n)" value="?" />
+	</plate>	
+	</alignment>
+
+    <plate var='c' range='182.5'>  
+		<tree spec='BeastTreeFromMaster' id="mastertree_$(c)"
+			  samplePopulationSizes="true"
+			  nSamples="1"
+			  reverseTime="false">
+
+			<model spec='Model' id='model_$(c)'>
+
+				<populationType spec='PopulationType' typeName='X' dim='1' id='X_$(c)'/>
+				<populationType spec='PopulationType' typeName='S' dim='1' id='S_$(c)'/>
+
+				<reactionGroup spec='ReactionGroup' reactionGroupName='Birth'>
+					<reaction spec='Reaction' rate="$(c)">
+						X[0] -> 2X[0]
+					</reaction>
+				</reactionGroup>
+
+				<reactionGroup spec='ReactionGroup' reactionGroupName='Death'>
+					<reaction spec='Reaction' rate="36.4635">
+						X[0] -> 0
+					</reaction>
+				</reactionGroup>
+
+				<reactionGroup spec='ReactionGroup' reactionGroupName='Sampling'>
+					<reaction spec='Reaction' rate="0.0365">
+						X[0]:1 -> S[0]:1
+					</reaction>
+				</reactionGroup>
+
+			</model>
+
+			<initialState spec='InitState'>
+				<lineageSeed spec='Individual'>
+					<population spec='Population' type="@X_$(c)" location="0"/>
+				</lineageSeed>
+			</initialState>
+
+			<lineageEndCondition spec='LineageEndCondition' nLineages="0" isRejection="true">
+				<population spec='Population' type='@X_$(c)' location="0" />
+			</lineageEndCondition>
+
+			<lineageEndCondition spec='LineageEndCondition' nLineages="250" isRejection="false">
+				<population spec='Population' type='@S_$(c)' location="0" />
+			</lineageEndCondition>
+
+			<inheritancePostProcessor spec='LineageFilter' populationName="S"/>
+
+			<inheritancePostProcessor spec='LineageFilter' populationName="S"
+									  leavesOnly="true" discard="true"/>
+
+			
+			<output spec='NexusOutput' fileName='$(filebase)_$(seed)_$(c).nexus'/>
+			
+
+		</tree>
+
+
+		<data spec='beast.app.seqgen.SimulatedAlignment' id='alignment_$(c)'
+			  data="@input_alignment_182.5"
+			  sequencelength="30000"
+			  outputFileName="$(filebase)_$(seed)_$(c)_alignment.txt"
+			  tree="@mastertree_$(c)" siteModel="@SiteModel">
+			<sequence spec="Sequence" taxon="dummy" value="?" />
+		</data>
+	</plate>
+
+
+
+			<siteModel spec="beast.evolution.sitemodel.SiteModel" id="SiteModel">
+				<parameter name="mutationRate" id="mutationRate" value="8e-4"/>
+				<substModel spec="HKY" id="hky">
+					<parameter name='kappa' id="kappa" value="1.0" lower="0.0"/>
+					<input name="frequencies" id='freqs' spec='Frequencies' frequencies="@freqParameter"/>
+				</substModel>
+			</siteModel>
+
+
+	<run chainLength="100000000" id="mcmc" spec="MCMC" storeEvery="10000" numInitializationAttempts="100">
+
+
+    	<plate var='c' range='109.3,109.4,109.5,109.6,182.5'>
+			<init spec="RandomTreeFromMaster" masterTree="@mastertree_$(c)"  taxa="@input_alignment_$(c)">
+				<tree spec="beast.evolution.tree.RandomTree" id="tree_$(c)" taxa="@input_alignment_$(c)">
+					<populationModel spec="ConstantPopulation">
+						<parameter name="popSize">5.0</parameter>
+					</populationModel>
+				</tree>
+			</init>
+		</plate>
+
+		<state id="state" storeEvery="10000">
+   			<parameter id="baseReproductiveNumber.t" spec="parameter.RealParameter" lower="0.0" name="stateNode" upper="Infinity">1.5</parameter>
+    		<parameter id="becomeUninfectiousRate.t" spec="parameter.RealParameter" lower="0.0" name="stateNode" upper="Infinity">36.5</parameter>
+			<stateNode idref="kappa"/>
+			<parameter id="freqParameter" dimension="4" lower="0.0" name="stateNode" upper="1.0" value="0.25"/>
+	    	<plate var='c' range='109.3,109.4,109.5,109.6,182.5'>
+	    		<stateNode idref="tree_$(c)"/>
+	   			<parameter id="lambda_ratio_$(c)" spec="parameter.RealParameter" name="stateNode">1</parameter>
+	   			<parameter id="samplingProportion_$(c).t" spec="parameter.RealParameter" lower="0.0" name="stateNode" upper="1.0">0.01</parameter>
+	    	</plate>
+		</state>
+
+		<distribution id="posterior" spec="util.CompoundDistribution">
+			<distribution id="prior" spec="util.CompoundDistribution">
+				<plate var='c' range='109.3,109.4,109.5,109.6,182.5'>
+					<distribution id="treePrior_$(c)" spec="beast.evolution.speciation.BirthDeathSkylineModel"
+					becomeUninfectiousRate="@becomeUninfectiousRate.t"  
+					baseReproductiveNumber="@baseReproductiveNumber.t" lambda_ratio="@lambda_ratio_$(c)"
+					samplingProportion="@samplingProportion_$(c).t" tree="@tree_$(c)" conditionOnRoot="true"/>
+					<prior id="lambda_ratioPrior.$(c).t" name="distribution" x="@lambda_ratio_$(c)">
+						 <LogNormal id="LogNormal.lambda_ratioPrior.$(c)" name="distr" M="0" S="1"/>
+					</prior>
+				</plate>
+				<prior id="R0Prior" name="distribution" x="@baseReproductiveNumber.t">
+					<LogNormal name="distr" M="0." S="1.25"/>
+				</prior>
+				<prior id="becomeUninfectiousRatePrior" name="distribution" x="@becomeUninfectiousRate.t">
+					<Uniform name="distr" lower="1" upper="100"/>
+				</prior>
+
+
+<plate var='c' range='109.3,109.4,109.5,109.6'>
+				<prior id="samplingProportionPrior_$(c)" name="distribution" x="@samplingProportion_$(c).t">
+					<Beta name="distr">
+					<parameter id="RealParameter_$(c).1" spec="parameter.RealParameter" name="alpha">10.0</parameter>
+                    <parameter id="RealParameter_$(c).2" spec="parameter.RealParameter" name="beta">990.0</parameter>
+                </Beta>
+				</prior>
+</plate>
+
+<plate var='c' range='182.5'>
+				<prior id="samplingProportionPrior_$(c)" name="distribution" x="@samplingProportion_$(c).t">
+					<Beta name="distr">
+					<parameter id="RealParameter_$(c).1" spec="parameter.RealParameter" name="alpha">1.0</parameter>
+                    <parameter id="RealParameter_$(c).2" spec="parameter.RealParameter" name="beta">99.0</parameter>
+                </Beta>
+				</prior>
+</plate>
+
+
+			</distribution>
+	    	<plate var='c' range='109.3,109.4,109.5,109.6,182.5'>
+				<distribution spec='TreeLikelihood' id="treeLikelihood_$(c)" useAmbiguities="true" siteModel="@SiteModel"
+							  data="@alignment_$(c)" tree="@tree_$(c)">
+				</distribution>
+			</plate>
+		</distribution>
+
+    	<plate var='c' range='109.3,109.4,109.5,109.6'>
+			<operator id="treeScaler_$(c)" scaleFactor="0.75" spec="ScaleOperator" tree="@tree_$(c)" weight="1.5"/>
+			<operator id="treeRootScaler_$(c)" rootOnly="true" scaleFactor="0.75" spec="ScaleOperator" tree="@tree_$(c)" weight="1.0"/>
+			<operator id="narrow_$(c)" spec="Exchange" tree="@tree_$(c)" weight="5.0"/>
+			<operator id="UniformOperator_$(c)" spec="Uniform" tree="@tree_$(c)" weight="10.0"/>
+			<operator id="SubtreeSlide_$(c)" spec="SubtreeSlide" tree="@tree_$(c)" weight="5.0"/>
+			<operator id="wide_$(c)" isNarrow="false" spec="Exchange" tree="@tree_$(c)" weight="1.0"/>
+			<operator id="WilsonBalding_$(c)" spec="WilsonBalding" tree="@tree_$(c)" weight="1.0"/>
+		</plate>
+
+    	<plate var='c' range='182.5'>
+			<operator id="treeScaler_$(c)" scaleFactor="0.75" spec="ScaleOperator" tree="@tree_$(c)" weight="5.0"/>
+			<operator id="treeRootScaler_$(c)" rootOnly="true" scaleFactor="0.75" spec="ScaleOperator" tree="@tree_$(c)" weight="3.0"/>
+			<operator id="narrow_$(c)" spec="Exchange" tree="@tree_$(c)" weight="15.0"/>
+			<operator id="UniformOperator_$(c)" spec="Uniform" tree="@tree_$(c)" weight="30.0"/>
+			<operator id="SubtreeSlide_$(c)" spec="SubtreeSlide" tree="@tree_$(c)" weight="15.0"/>
+			<operator id="wide_$(c)" isNarrow="false" spec="Exchange" tree="@tree_$(c)" weight="3.0"/>
+			<operator id="WilsonBalding_$(c)" spec="WilsonBalding" tree="@tree_$(c)" weight="3.0"/>
+		</plate>		
+		
+		<operator id='R0Operator' spec='ScaleOperator' scaleFactor=".75" weight="2" parameter="@baseReproductiveNumber.t"/>
+	
+<plate var='c' range='109.3,109.4,109.5,109.6,182.5'>
+		<operator id='sOperator_$(c)' spec='ScaleOperator' scaleFactor=".75" weight="2" parameter="@samplingProportion_$(c).t"/>
+		<operator id="updown2_$(c)" spec="UpDownOperator" scaleFactor=".9" weight="2" up="@baseReproductiveNumber.t" down="@samplingProportion_$(c).t"/>
+</plate>
+    	<plate var='c' range='109.3,109.4,109.6,182.5'>
+			<operator id="lambda_ratioScaler$(c).t" spec="ScaleOperator" parameter="@lambda_ratio_$(c)" scaleFactor="0.75" weight="1.0"/>
+		</plate>
+
+		<operator id="kappaScaler" parameter="@kappa" scaleFactor="0.5" spec="ScaleOperator" weight="0.1"/>
+		<operator delta="0.01" id="FrequenciesExchanger" spec="DeltaExchangeOperator" weight="0.1" parameter="@freqParameter"/>
+
+		<logger fileName="$(filebase)_$(seed).log" id="log" logEvery="10000" mode="autodetect">
+			<distribution idref="posterior" name="log"/>
+	    	<plate var='c' range='109.3,109.4,109.5,109.6,182.5'>
+				<log idref="treeLikelihood_$(c)"/>
+				<log idref="treePrior_$(c)"/>
+				<log id="TreeHeight_$(c)" spec="beast.evolution.tree.TreeHeightLogger" tree="@tree_$(c)"/>
+			</plate>
+			<log idref="baseReproductiveNumber.t"/>
+	    	<plate var='c' range='109.3,109.4,109.5,109.6,182.5'>
+				<log idref="lambda_ratio_$(c)"/>
+			</plate>
+			<log idref="becomeUninfectiousRate.t"/>
+		<plate var='c' range='109.3,109.4,109.5,109.6,182.5'>	
+			<log idref="samplingProportion_$(c).t"/>
+		</plate>
+			<log idref="mutationRate"/>
+			<log idref="kappa"/>
+			<log idref="freqParameter"/>
+		</logger>
+
+    	<plate var='c' range='109.3,109.4,109.5,109.6,182.5'>
+			<logger fileName="$(filebase)_$(seed)_$(c).trees" logEvery="10000" mode="autodetect" log="@tree_$(c)"/>
+		</plate>
+
+		<logger id="screenlog" logEvery="1000" mode="autodetect">
+			<distribution idref="posterior" name="log"/>
+			<log arg="@posterior" id="ESS.0" spec="util.ESS"/>
+	    	<plate var='c' range='109.3,109.4,109.5,109.6,182.5'>
+				<log idref="treeLikelihood_$(c)"/>
+				<log idref="treePrior_$(c)"/>
+				<log idref="TreeHeight_$(c)"/>
+			</plate>
+			<log idref="baseReproductiveNumber.t"/>
+			<log idref="becomeUninfectiousRate.t"/>
+			<log idref="mutationRate"/>
+		</logger>
+	</run>
+
+</beast>
