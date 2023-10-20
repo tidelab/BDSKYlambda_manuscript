@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><beast beautitemplate='Standard' beautistatus='' namespace="beast.core:beast.evolution.alignment:beast.evolution.tree.coalescent:beast.core.util:beast.evolution.nuc:beast.evolution.operators:beast.evolution.sitemodel:beast.evolution.substitutionmodel:beast.evolution.likelihood" version="2.0">
+
+<map name="Uniform" >beast.math.distributions.Uniform</map>
+<map name="Exponential" >beast.math.distributions.Exponential</map>
+<map name="LogNormal" >beast.math.distributions.LogNormalDistributionModel</map>
+<map name="Normal" >beast.math.distributions.Normal</map>
+<map name="Beta" >beast.math.distributions.Beta</map>
+<map name="Gamma" >beast.math.distributions.Gamma</map>
+<map name="LaplaceDistribution" >beast.math.distributions.LaplaceDistribution</map>
+<map name="prior" >beast.math.distributions.Prior</map>
+<map name="InverseGamma" >beast.math.distributions.InverseGamma</map>
+<map name="OneOnX" >beast.math.distributions.OneOnX</map>
+
+
+<!-- sequence alignments for all clusters, here for illustration purposes two clusters with three sequences -->
+<!-- setup can be modified, here according to Weber, Översti, Kühnert: "Reconstructing relative transmission rates in Bayesian phylodynamics.." -->
+<data id="cluster1" name="alignment">
+    <sequence id="seq_11" spec="Sequence" taxon="11" totalcount="4" value="N"/>
+    <sequence id="seq_12" spec="Sequence" taxon="12" totalcount="4" value="N"/>
+    <sequence id="seq_13" spec="Sequence" taxon="13" totalcount="4" value="N"/>
+</data>
+
+<data id="cluster2" name="alignment">
+    <sequence id="seq_21" spec="Sequence" taxon="21" totalcount="4" value="N"/>
+    <sequence id="seq_22" spec="Sequence" taxon="22" totalcount="4" value="N"/>
+    <sequence id="seq_23" spec="Sequence" taxon="23" totalcount="4" value="N"/>
+</data>
+
+<taxa id="TaxonSet1"            spec="TaxonSet">                <alignment idref="cluster1"/>           </taxa>
+<taxa id="TaxonSet2"            spec="TaxonSet">                <alignment idref="cluster2"/>           </taxa>
+
+<!-- definition of substitution model, here HKY -->
+<siteModel id="SiteModel.s" spec="SiteModel">
+    <parameter id="mutationRate.s" estimate="false" name="mutationRate">1.0</parameter>
+    <parameter id="gammaShape.s" estimate="true" name="shape">1.0</parameter>
+    <parameter id="proportionInvariant.s" estimate="false" lower="0.0" name="proportionInvariant" upper="1.0">0.0</parameter>
+    <substModel id="hky.s" spec="HKY" kappa="@kappa.s">
+        <frequencies id="estimatedFreqs.s" spec="Frequencies" frequencies="@freqParameter.s"/>
+    </substModel>
+</siteModel>
+
+<!-- MCMC -->
+<run id="mcmc" spec="MCMC" chainLength="30000000" numInitializationAttempts="50000">
+
+<!-- initial trees setup for each cluster with tip dates specified-->
+<init id="Tree1" spec="beast.evolution.tree.RandomTree" taxa="@cluster1">			<populationModel spec="beast.evolution.tree.coalescent.ConstantPopulation" popSize="0.1"/>				<trait id="dateTrait1" spec="beast.evolution.tree.TraitSet" taxa="@TaxonSet1" dateFormat="yyyy-MM-dd" traitname="date" value="11=yyyy-MM-dd,12=yyyy-MM-dd,13=yyyy-MM-dd">		</trait>			<taxonset idref="TaxonSet1"/>		</init>
+
+<init id="Tree2" spec="beast.evolution.tree.RandomTree" taxa="@cluster2">			<populationModel spec="beast.evolution.tree.coalescent.ConstantPopulation" popSize="0.1"/>				<trait id="dateTrait2" spec="beast.evolution.tree.TraitSet" taxa="@TaxonSet2" dateFormat="yyyy-MM-dd" traitname="date" value="21=yyyy-MM-dd,22=yyyy-MM-dd,23=yyyy-MM-dd">		</trait>			<taxonset idref="TaxonSet2"/>		</init>
+
+<state id="state" storeEvery="5000">
+    <!-- state nodes / parameter which are changed during MCMC with dimensions (number of constant intervals for R, delta and s) and initial values-->
+    <!-- LAMBDA RATIO: add lambda ratio parameters for each cluster as a state node (lamda_ratio that is fixed to 1 does not neccessarily need to be a defined as a state node)-->
+    <plate var='n' range='1,2'>
+		<stateNode idref="Tree$(n)"/>
+        <parameter id="lambda_ratio_$(n)" spec="parameter.RealParameter" name="stateNode">1</parameter>
+    </plate>
+    <parameter id="becomeUninfectiousRate.t" dimension="1" spec="parameter.RealParameter" lower="0.0" name="stateNode" upper="Infinity">36.5</parameter>
+    <parameter id="reproductiveNumber.t" dimension="1" spec="parameter.RealParameter" lower="0.0" name="stateNode" upper="Infinity">1.5</parameter>
+    <parameter id="samplingProportion.t" dimension="1" spec="parameter.RealParameter" lower="0.0" name="stateNode" upper="1.0">0.1</parameter>
+    <parameter id="clockRate.c" spec="parameter.RealParameter" name="stateNode">0.0008</parameter>
+    <parameter id="kappa.s" spec="parameter.RealParameter" lower="0.0" name="stateNode">2.0</parameter>
+    <parameter id="freqParameter.s" spec="parameter.RealParameter" dimension="4" lower="0.0" name="stateNode" upper="1.0">0.25</parameter>
+    <stateNode idref="gammaShape.s"/>
+</state>
+
+<distribution id="posterior" spec="util.CompoundDistribution">
+    <distribution id="prior" spec="util.CompoundDistribution">
+
+        <!--individual BDSKY tree prior for each cluster under the same parameters R, delta and s-->
+        <!--LAMBDA RATIO: 1) "reproductiveNumber input changed to "baseReproductiveNumber" input (important - won't result in error if missed!) and 2) add "lambda_ratio" input-->
+     	<distribution id="treePriors" spec="util.CompoundDistribution">
+			<plate var='n' range='1,2'>
+                <distribution id="BDSKY_Serial.$(n)" spec="beast.evolution.speciation.BirthDeathSkylineModel"
+            	becomeUninfectiousRate="@becomeUninfectiousRate.t" lambda_ratio="@lambda_ratio_$(n)" baseReproductiveNumber="@reproductiveNumber.t" samplingProportion="@samplingProportion.t" reverseTimeArrays="@reverseTimeArrays"
+            	tree="@Tree$(n)" conditionOnRoot="true"/>
+			</plate>
+        </distribution>
+
+
+        <!-- priors for population genetic model -->
+        <prior id="FrequenciesPrior.s" name="distribution" x="@freqParameter.s">
+             <Uniform id="Uniform.831" name="distr"/>
+        </prior>
+
+        <prior id="KappaPrior.s" name="distribution" x="@kappa.s">
+            <LogNormal id="LogNormalDistributionModel.307" name="distr">
+                <parameter id="RealParameter.24" spec="parameter.RealParameter" estimate="false" name="M">1.0</parameter>
+                <parameter id="RealParameter.753" spec="parameter.RealParameter" estimate="false" name="S">1.25</parameter>
+            </LogNormal>
+        </prior>
+
+        <prior id="GammaShapePrior.s" name="distribution" x="@gammaShape.s">
+            <Exponential id="Exponential.951" name="distr" mean="1.0"/>
+        </prior>
+
+        <!-- prior for population dynamic model, i.e. on delta, R and s-->
+        <distribution id="becomeUninfectiousRatePrior.t0" spec="beast.math.distributions.ExcludablePrior" xInclude="true" name="distribution" x="@becomeUninfectiousRate.t">
+            <Normal id="NormalDistributionModel.0" name="distr">
+                <parameter id="RealParameter.00" spec="parameter.RealParameter" estimate="false" name="mean">36.5</parameter>
+                <parameter id="RealParameter.01" spec="parameter.RealParameter" estimate="false" name="sigma">1</parameter>
+            </Normal>
+        </distribution>
+
+        <distribution id="reproductiveNumberPrior.t" spec="beast.math.distributions.ExcludablePrior" xInclude="true" name="distribution" x="@reproductiveNumber.t">
+            <LogNormal id="LogNormalDistributionModel.143" name="distr">
+                <parameter id="RealParameter.908" spec="parameter.RealParameter" estimate="false" name="M">0.0</parameter>
+                <parameter id="RealParameter.717" spec="parameter.RealParameter" estimate="false" name="S">4.0</parameter>
+            </LogNormal>
+        </distribution>
+
+        <distribution id="samplingProportionPrior.t0" spec="beast.math.distributions.ExcludablePrior" xInclude="true" name="distribution" x="@samplingProportion.t">
+            <Beta id="Beta.1" name="distr">
+                <parameter id="RealParameter.711" spec="parameter.RealParameter" estimate="false" name="alpha">40.0</parameter>
+                <parameter id="RealParameter.746" spec="parameter.RealParameter" estimate="false" name="beta">960.0</parameter>
+            </Beta>
+        </distribution>
+
+        <!--LAMBDA RATIO: add prior distribution for lambda ratio parameters of all clusters (needs to overlap 1 for cluster with fixed ratio!)-->
+        <plate var='n' range='1,2'>
+            <prior id="lambda_ratioPrior_$(n).t" name="distribution" x="@lambda_ratio_$(n)">
+                <LogNormal id="LogNormal.lambda_ratioPrior.$(n)" name="distr" M="0" S="1"/>
+            </prior>
+        </plate>
+
+    </distribution>
+
+<!--phylogenetic likelihood with predefined clock and substitution model for each tree -->
+    <distribution id="likelihood" spec="util.CompoundDistribution">
+	    <plate var='n' range='1,2'>
+			<distribution id="treeLikelihood$(n)" spec="TreeLikelihood" data="@cluster$(n)" tree="@Tree$(n)" siteModel="@SiteModel.s"  useAmbiguities="true">
+				<branchRateModel id="StrictClock$(n)" spec="beast.evolution.branchratemodel.StrictClockModel" clock.rate="@clockRate.c"/>
+	        </distribution>
+		</plate>
+    </distribution>
+</distribution>
+
+<!--tree specific operators (weights can be scaled by cluster size to improve mixing) -->
+<operator id="BDSKY_SerialTreeScaler1.t" spec="ScaleOperator" scaleFactor="0.5" tree="@Tree1" weight="0.125"/>
+<operator id="BDSKY_SerialTreeRootScaler1.t" spec="ScaleOperator" rootOnly="true" scaleFactor="0.5" tree="@Tree1" weight="0.125"/>
+<operator id="BDSKY_SerialUniformOperator1.t" spec="Uniform" tree="@Tree1" weight="1.25"/>
+<operator id="BDSKY_SerialSubtreeSlide1.t" spec="SubtreeSlide" tree="@Tree1" weight="0.625"/>
+<operator id="BDSKY_SerialNarrow1.t" spec="Exchange" tree="@Tree1" weight="0.625"/>
+<operator id="BDSKY_SerialWide1.t" spec="Exchange" isNarrow="false" tree="@Tree1" weight="0.125"/>
+<operator id="BDSKY_SerialWilsonBalding1.t" spec="WilsonBalding" tree="@Tree1" weight="0.125"/>
+
+<operator id="BDSKY_SerialTreeScaler2.t" spec="ScaleOperator" scaleFactor="0.5" tree="@Tree2" weight="0.125"/>
+<operator id="BDSKY_SerialTreeRootScaler2.t" spec="ScaleOperator" rootOnly="true" scaleFactor="0.5" tree="@Tree2" weight="0.125"/>
+<operator id="BDSKY_SerialUniformOperator2.t" spec="Uniform" tree="@Tree2" weight="1.25"/>
+<operator id="BDSKY_SerialSubtreeSlide2.t" spec="SubtreeSlide" tree="@Tree2" weight="0.625"/>
+<operator id="BDSKY_SerialNarrow2.t" spec="Exchange" tree="@Tree2" weight="0.625"/>
+<operator id="BDSKY_SerialWide2.t" spec="Exchange" isNarrow="false" tree="@Tree2" weight="0.125"/>
+<operator id="BDSKY_SerialWilsonBalding2.t" spec="WilsonBalding" tree="@Tree2" weight="0.125"/>
+
+<!-- operators for global parameters, here delta fixed-->
+<!--operator id="becomeUninfectiousRateScaler.t" spec="ScaleOperator" parameter="@becomeUninfectiousRate.t" scaleFactor="0.75" weight="2.0"/-->
+<operator id="reproductiveNumberScaler.t" spec="ScaleOperator" parameter="@reproductiveNumber.t" scaleFactor="0.75" weight="10.0"/>
+<operator id="samplingProportionScaler.t" spec="ScaleOperator" parameter="@samplingProportion.t" scaleFactor="0.75" weight="10.0"/>
+<!--operator id="updownBD.t" spec="UpDownOperator" scaleFactor="0.75" weight="2.0">
+    <up idref="reproductiveNumber.t"/>
+    <down idref="becomeUninfectiousRate.t"/>
+</operator>
+<operator id="updownDS.t" spec="UpDownOperator" scaleFactor="0.75" weight="2.0">
+    <up idref="becomeUninfectiousRate.t"/>
+    <down idref="samplingProportion.t"/>
+</operator-->
+<operator id="FrequenciesExchanger.s" spec="DeltaExchangeOperator" delta="0.01" weight="0.4">
+    <parameter idref="freqParameter.s"/>
+</operator>
+<operator id="KappaScaler.s" spec="ScaleOperator" parameter="@kappa.s" scaleFactor="0.5" weight="0.1"/>
+<operator id="gammaShapeScaler.c" spec="ScaleOperator" parameter="@gammaShape.s" scaleFactor="0.75" weight="0.2"/>
+
+<!--LAMBDA RATIO: add operator on lambda ratio of all BUT ONE cluster (important - won't result in error if missed!)-->
+<plate var='n' range='2'>
+    <operator id="lambda_ratioScaler_$(n).t" spec="ScaleOperator" parameter="@lambda_ratio_$(n)" scaleFactor="0.75" weight="1.0"/>
+</plate>
+
+<!-- loggers -->
+<logger id="tracelog" fileName="$(filebase).$(seed).log" logEvery="10000" model="@posterior" >
+    <log idref="posterior"/>
+    <log idref="likelihood"/>
+    <log idref="prior"/>
+    <log idref="treePriors"/>
+    <log idref="kappa.s"/>
+    <log idref="becomeUninfectiousRate.t"/>
+    <log idref="reproductiveNumber.t"/>
+    <!--LAMBDA RATIO: add lambda ratios to log file, here 'lambda_ratio_1' is fixed to 1-->
+    <plate var='n' range='1,2'>
+        <log idref="lambda_ratio_$(n)"/>
+    </plate>
+    <log idref="samplingProportion.t"/>
+    <log idref="freqParameter.s"/>
+    <log idref="gammaShape.s"/>
+    <log idref="clockRate.c"/>
+    <plate var='n' range='1,2'>
+        <log idref="BDSKY_Serial.$(n)"/>
+    </plate>
+    <plate var='n' range='1,2'>
+        <log id="treeHeight$(n)" spec="beast.evolution.tree.TreeHeightLogger" tree="@Tree$(n)"/>
+    </plate>
+    <plate var='n' range='1,2'>
+        <log idref="treeLikelihood$(n)"/>
+    </plate>
+</logger>
+
+<logger id="screenlog" logEvery="10000">
+    <log idref="posterior"/>
+    <log id="ESS.0" spec="util.ESS" arg="@posterior"/>
+    <log idref="likelihood"/>
+    <log idref="prior"/>
+</logger>
+
+<plate var='n' range='1,2'>
+	<logger id="treelog$(n)" fileName="$(filebase).$(seed).cluster$(n).trees" logEvery="10000" mode="tree">
+		<log id="TreeWithMetaDataLogger.$(n)" spec="beast.evolution.tree.TreeWithMetaDataLogger" tree="@Tree$(n)"/>
+	</logger>
+</plate>
+
+</run>
+
+</beast>
